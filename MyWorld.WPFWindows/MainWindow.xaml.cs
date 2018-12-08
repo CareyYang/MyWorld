@@ -23,6 +23,12 @@ namespace MyWorld.WPFWindows
         public MainWindow()
         {
             InitializeComponent();
+            Test();
+        }
+
+        public void Test()
+        {
+            txtTest.Text = sizeof(int).ToString();
         }
     }
 }
