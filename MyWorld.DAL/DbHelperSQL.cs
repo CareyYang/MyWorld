@@ -905,5 +905,76 @@ namespace MyWorld.DAL
         }
 
         #endregion
+            
+            /// <summary>
+        /// 使用Bulk方法快速插入SQLServer
+        /// </summary>
+        /// <param name="connectionString">连接字符串</param>
+        /// <param name="TableName">数据库中表名</param>
+        /// <param name="dt">要插入的集合（DataTable类型）</param>
+        /// <returns></returns>
+        public static bool SQLBulk(string connectionString,string TableName,DataTable dt)
+        {
+            bool flag = false;
+
+            using (SqlConnection conn=new SqlConnection(connectionString))
+            {
+                using (SqlBulkCopy bulk = new SqlBulkCopy(connectionString, SqlBulkCopyOptions.UseInternalTransaction))
+                {
+                    try
+                    {
+                        bulk.DestinationTableName = TableName;
+                        bulk.BatchSize = dt.Rows.Count;
+                        for (int i = 0; i < dt.Columns.Count; i++)
+                        {
+                            //useful or not?
+                            bulk.ColumnMappings.Add(dt.Columns[i].ColumnName, dt.Columns[i].ColumnName);
+                        }
+                        bulk.WriteToServer(dt);
+                        flag = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        flag = false;
+                        LogHelper.Write($"The Exception occured when Bulk insert to SQLServer，the StackTrace：{ex.StackTrace},the Message:{ex.Message}");
+                    }
+                }
+                return flag;
+            }
+        }
+
+        public static bool SQLBulk<T>(string connectionString,string TableName,IList<T> list)
+        {
+            bool flag = false;
+
+            DataTable dt = new DataTable();
+            using (SqlBulkCopy bulk = new SqlBulkCopy(connectionString))
+            {
+                bulk.BatchSize = list.Count;
+                bulk.DestinationTableName = TableName;
+                PropertyDescriptor[] props = TypeDescriptor
+                .GetProperties(typeof(T))
+                .Cast<PropertyDescriptor>()
+                .Where(w => w.PropertyType.Namespace.Equals("System"))
+                .ToArray();
+
+                foreach (var item in props)
+                {
+                    bulk.ColumnMappings.Add(item.Name, item.Name);
+                    dt.Columns.Add(item.Name, Nullable.GetUnderlyingType(item.PropertyType) ?? item.PropertyType);
+                }
+                var values = new object[props.Length];
+                foreach (var item in list)
+                {
+                    for (int i = 0; i < values.Length; i++)
+                    {
+                        values[i] = props[i].GetValue(item);
+                    }
+                    dt.Rows.Add(values);
+                }
+                bulk.WriteToServer(dt);
+            }
+            return flag;
+        }
     }
 }
