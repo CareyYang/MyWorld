@@ -976,5 +976,35 @@ namespace MyWorld.DAL
             }
             return flag;
         }
+        
+        /// <summary>
+        /// 执行查询语句，返回SqlDataReader ( 注意：调用该方法后，一定要对SqlDataReader进行Close )
+        /// </summary>
+        /// <param name="strSQL">查询语句</param>
+        /// <returns>SqlDataReader</returns>
+        //public static IEnumerable<T> ExecuteReader<T>(string connectionString, string SQLString, params SqlParameter[] cmdParms) where T:class
+        //{
+
+        //    using (SqlConnection conn=new SqlConnection(connectionString))
+        //    {
+        //        conn.Open();
+        //        using (SqlCommand cmd= conn.CreateCommand())
+        //        {
+        //            PrepareCommand(cmd, conn, null, SQLString, cmdParms);
+        //            using(SqlDataReader reader = cmd.ExecuteReader())
+        //            {
+        //                while (reader.Read())
+        //                {
+        //                    object[] result = new object[reader.FieldCount];
+        //                    for (int i = 0; i < reader.FieldCount; i++)
+        //                    {
+        //                        T[i] = reader.GetName(i);
+        //                    }
+        //                    yield return result.ToList<T>();
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
     }
 }
